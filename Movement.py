@@ -3,7 +3,10 @@ import random
 import mp3play
 import time
 from random import randint
-cd c:\users\angelo\my documents 
+cd "C:\Users\Owner\Documents\GitHub\FallingBalls"
+archivo = r'Minimal.mp3'#Path del archivo de musica
+archivo2 = r'bolitatocada.mp3'
+archivo3 = r'bombaS.mp3'
 
 ESC = 27 #Valor ASCII de el ESC
 
@@ -33,6 +36,7 @@ def WaitKey(delay = 0):
 #Obtener la posicion y el shape 
 #Obtener el centro u origen 
 #Actualizar la posicion con la velocidad
+
 class Bolita:
     """ Clase representando la bolita """
     def __init__(self, x, y, tipo):#constructor de la bolita
@@ -44,8 +48,6 @@ class Bolita:
         self.active = True
         self.tipo = tipo
 
-
-
     def getDimensions(self):
         return (self.x, self.y, self.width, self.height)
 
@@ -55,14 +57,13 @@ class Bolita:
     def update(self):
         self.x += self.speed[0]
         self.y += self.speed[1]
+#{} class bolita
 
 #Creacion de la ventana para mostrar las imagenes capturadas
 #cv.NamedWindow("window_a", cv.CV_WINDOW_AUTOSIZE)#Ventana para mostrar el juego
 #cv.NamedWindow("window_b", cv.CV_WINDOW_AUTOSIZE)#Ventana para mostrar la diferencia
 
-archivo = r'Minimal.mp3'#Path del archivo de musica
-archivo2 = r'bolitatocada.mp3'
-archivo3 = r'bombaS.mp3'
+
 mp3 = mp3play.load(archivo)#Cargar el archivo de musica 
 mp32 = mp3play.load(archivo2)
 mp33 = mp3play.load(archivo3)
@@ -178,8 +179,13 @@ def detect_faces(image):
             faces.append((x,y,w,h))
     return faces
 
-
-
+def terminar_juego():
+    mp3.stop()
+    cv.PutText(capture, "Perdio! bai" , (50,frame_size[1]-200), font, cv.RGB(0,0,0))
+    time.sleep(3000)
+    cv2.destroyAllWindows()
+    cv.destroyAllWindows()
+    sys.exit()
 
 
 storage = cv.CreateMemStorage()
@@ -210,19 +216,17 @@ vidas = crear_vidas(nvidas)#crear la lista de corazoncitas
 # Loop principal
 mp3.play()
 i = 0
-while True:
+juegoTerminado = False
+while juegoTerminado != True:
     
     capture = cv.QueryFrame(cam)# Capturar un frame de la camara
     cv.Flip(capture, capture, flipMode=1)#rotar la imagen para que salga derecha
 
     
-    
-
     for v in vidas:
         cv.SetImageROI(capture, v.getDimensions())
         cv.Copy(corazon, capture, mask3)
         cv.ResetImageROI(capture)
-
 
     ############################################################3
     if i%5==0:
@@ -285,6 +289,12 @@ while True:
 
                     else: 
                         mp33.play()
+                        nvidas-=1 #Para eliminar las vidas de la pantalla
+
+                        if nvidas<1:
+                            terminar_juego()
+                            #juegoTerminado = True
+                        vidas = crear_vidas(nvidas)
                     tipo = randint(0, 1)
                     t.tipo = tipo
                     t.y = 0#se ubica la bolita al inicio de la pantalla
@@ -308,5 +318,5 @@ while True:
 
     initialDelay -= 1#ir disminuyendo el delay
     i += 1
-
+terminar_juego() #terminar el juego 
 print score#imprimir el score
