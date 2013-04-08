@@ -8,7 +8,7 @@ import mp3play
 import time
 import numpy as np
 from random import randint
-cd c:\users\angelo\my documents 
+cd "C:\Users\Owner\Documents\GitHub\FallingBalls"
 
 ESC = 27 #Valor ASCII de el ESC
 
@@ -67,9 +67,9 @@ class Bolita:
 #cv.NamedWindow("window_a", cv.CV_WINDOW_AUTOSIZE)#Ventana para mostrar el juego
 #cv.NamedWindow("window_b", cv.CV_WINDOW_AUTOSIZE)#Ventana para mostrar la diferencia
 
-archivo = r'C:\users\angelo\my documents\Minimal.mp3'#Path del archivo de musica
-archivo2 = r'C:\users\angelo\my documents\bolitatocada.mp3'
-archivo3 = r'C:\users\angelo\my documents\bombaS.mp3'
+archivo = r'Minimal.mp3'#Path del archivo de musica
+archivo2 = r'bolitatocada.mp3'
+archivo3 = r'bombaS.mp3'
 mp3 = mp3play.load(archivo)#Cargar el archivo de musica 
 mp32 = mp3play.load(archivo2)
 mp33 = mp3play.load(archivo3)
@@ -184,6 +184,12 @@ def detect_faces(image):
         for (x,y,w,h),n in detected:
             faces.append((x,y,w,h))
     return faces
+def terminar_juego():
+    #while True:
+    #cv.PutText(capture, "Perdio Mejor suerte" , (50,frame_size[1]-50), font, cv.RGB(0,0,0))
+    time.sleep(5)
+    cv2.destroyAllWindows()
+    mp3.stop()
 
 
 
@@ -217,7 +223,8 @@ vidas = crear_vidas(nvidas)#crear la lista de corazoncitas
 # Loop principal
 mp3.play()
 i = 0
-while True:
+juego_terminado = False
+while juego_terminado == False:
     
     capture = cv.QueryFrame(cam)# Capturar un frame de la camara
     cv.Flip(capture, capture, flipMode=1)#rotar la imagen para que salga derecha
@@ -293,6 +300,12 @@ while True:
 
                     else: 
                         mp33.play()
+                        nvidas-=1 #Para eliminar las vidas de la pantalla
+
+                        if nvidas<1:
+                            juego_terminado = True
+                            break
+                        vidas = crear_vidas(nvidas)
                     tipo = randint(0, 1)
                     t.tipo = tipo
                     t.y = 0#se ubica la bolita al inicio de la pantalla
@@ -314,12 +327,11 @@ while True:
     
     c = WaitKey(2)# Acabar el juego si se presiona ESC
     if c == 27:
-        cv2.destroyAllWindows()
-        mp3.stop()
+        terminar_juego()
         break
 
     initialDelay -= 1#ir disminuyendo el delay
     i += 1
 
+terminar_juego()
 print score#imprimir el score
-
