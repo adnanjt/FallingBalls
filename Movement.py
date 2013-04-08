@@ -186,8 +186,10 @@ def detect_faces(image):
     return faces
 def terminar_juego():
     #while True:
-    #cv.PutText(capture, "Perdio Mejor suerte" , (50,frame_size[1]-50), font, cv.RGB(0,0,0))
-    time.sleep(5)
+    #capture = cv.QueryFrame(cam)# Capturar un frame de la camara
+    #frame = cv.CreateImage(frame_size, 8, 1)#creacion del frame
+    #cv.Flip(capture, capture, flipMode=1)#rotar la imagen para que salga derecha
+    c = WaitKey(15000)# Acabar el juego si se presiona ESC
     cv2.destroyAllWindows()
     mp3.stop()
 
@@ -206,7 +208,7 @@ score = 0#puntuacion
 
 font = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 8, 8)#Letras para mostrar la puntuacion
 font2 = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 4, 8)#Letras para mostrar la puntuacion
-
+font3 = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 8, 8)#Letras para mostrar la puntuacion
 nvidas = 3#numero de vidas del jugador
 vidas = crear_vidas(nvidas)#crear la lista de corazoncitas
 
@@ -301,11 +303,13 @@ while juego_terminado == False:
                     else: 
                         mp33.play()
                         nvidas-=1 #Para eliminar las vidas de la pantalla
-
-                        if nvidas<1:
-                            juego_terminado = True
-                            break
                         vidas = crear_vidas(nvidas)
+                        if nvidas<0:
+                            juego_terminado = True
+                            cv.PutText(capture, "GAME OVER" , (50,frame_size[1]/2), font3, cv.RGB(150,0,0))
+                            cv.PutText(capture, "GAME OVER" , (50*5,frame_size[1]/2), font3, cv.RGB(150,0,0))
+                            cv.PutText(capture, "GAME OVER" , (50*10,frame_size[1]/2), font3, cv.RGB(150,0,0))
+                            break
                     tipo = randint(0, 1)
                     t.tipo = tipo
                     t.y = 0#se ubica la bolita al inicio de la pantalla
@@ -327,7 +331,8 @@ while juego_terminado == False:
     
     c = WaitKey(2)# Acabar el juego si se presiona ESC
     if c == 27:
-        terminar_juego()
+        cv2.destroyAllWindows()
+        mp3.stop()
         break
 
     initialDelay -= 1#ir disminuyendo el delay
