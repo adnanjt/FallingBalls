@@ -212,6 +212,8 @@ score = 0#puntuacion
 
 font = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 8, 8)#Letras para mostrar la puntuacion
 font2 = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 4, 8)#Letras para mostrar la puntuacion
+font3 = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 8, 8)#Letras para mostrar la puntuacion
+
 
 nvidas = 3#numero de vidas del jugador
 vidas = crear_vidas(nvidas)#crear la lista de corazoncitas
@@ -225,11 +227,13 @@ vidas = crear_vidas(nvidas)#crear la lista de corazoncitas
 # bola - imagen de la bola menor
 # mask_original - imagen de mascara
 # mask - imagen de mascara menor
+juego_terminado = False
+
 
 # Loop principal
 mp3.play()
 i = 0
-while True:
+while juego_terminado == False:
     
     capture = cv.QueryFrame(cam)# Capturar un frame de la camara
     cv.Flip(capture, capture, flipMode=1)#rotar la imagen para que salga derecha
@@ -322,6 +326,15 @@ while True:
 
                     else: 
                         mp33.play()
+                        nvidas-=1 #Para eliminar las vidas de la pantalla
+                        vidas = crear_vidas(nvidas)
+                        if nvidas<0:
+                            juego_terminado = True
+                            cv.PutText(capture, "GAME OVER" , (50,frame_size[1]/2), font3, cv.RGB(150,0,0))
+                            cv.PutText(capture, "GAME OVER" , (50*5,frame_size[1]/2), font3, cv.RGB(150,0,0))
+                            cv.PutText(capture, "GAME OVER" , (50*10,frame_size[1]/2), font3, cv.RGB(150,0,0))
+                            break
+
                     tipo = randint(0, 10)#probabilidad mas alta que salga una bolita a una bomba
                     if tipo >= 0 and tipo <= 7:
                         tipo = 0
@@ -351,6 +364,6 @@ while True:
 
     initialDelay -= 1#ir disminuyendo el delay
     i += 1
-
+terminar_juego()
 print score#imprimir el score
 
