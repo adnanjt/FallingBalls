@@ -1,12 +1,14 @@
+
+# OpenCV en Python : http://opencv.willowgarage.com/documentation/python/index.html
+#http://www.cs.iit.edu/~agam/cs512/lect-notes/opencv-intro/opencv-intro.html
+import cv2
 import cv2.cv as cv
 import random
 import mp3play
 import time
+import numpy as np
 from random import randint
 cd "C:\Users\Owner\Documents\GitHub\FallingBalls"
-archivo = r'Minimal.mp3'#Path del archivo de musica
-archivo2 = r'bolitatocada.mp3'
-archivo3 = r'bombaS.mp3'
 
 ESC = 27 #Valor ASCII de el ESC
 
@@ -22,9 +24,11 @@ def WaitKey(delay = 0):
 # if __name__ == '__main__':
 #     cv.NamedWindow("prueba", cv.CV_WINDOW_AUTOSIZE)
 
-    # cv.ShowImage("prueba", None)
-    # c = cv.WaitKey()
-    # print "%d - %d" % (c & ~0b100000000000000000000,c)
+#     cv2.resizeWindow("prueba", 500, 500)
+
+#     cv.ShowImage("prueba", None)
+#     c = cv.WaitKey()
+#     print "%d - %d" % (c & ~0b100000000000000000000,c)
 
 
 #Clase para la imagen
@@ -36,7 +40,6 @@ def WaitKey(delay = 0):
 #Obtener la posicion y el shape 
 #Obtener el centro u origen 
 #Actualizar la posicion con la velocidad
-
 class Bolita:
     """ Clase representando la bolita """
     def __init__(self, x, y, tipo):#constructor de la bolita
@@ -48,6 +51,8 @@ class Bolita:
         self.active = True
         self.tipo = tipo
 
+
+
     def getDimensions(self):
         return (self.x, self.y, self.width, self.height)
 
@@ -57,13 +62,14 @@ class Bolita:
     def update(self):
         self.x += self.speed[0]
         self.y += self.speed[1]
-#{} class bolita
 
 #Creacion de la ventana para mostrar las imagenes capturadas
 #cv.NamedWindow("window_a", cv.CV_WINDOW_AUTOSIZE)#Ventana para mostrar el juego
 #cv.NamedWindow("window_b", cv.CV_WINDOW_AUTOSIZE)#Ventana para mostrar la diferencia
 
-
+archivo = r'Minimal.mp3'#Path del archivo de musica
+archivo2 = r'bolitatocada.mp3'
+archivo3 = r'bombaS.mp3'
 mp3 = mp3play.load(archivo)#Cargar el archivo de musica 
 mp32 = mp3play.load(archivo2)
 mp33 = mp3play.load(archivo3)
@@ -178,14 +184,15 @@ def detect_faces(image):
         for (x,y,w,h),n in detected:
             faces.append((x,y,w,h))
     return faces
-
 def terminar_juego():
-    mp3.stop()
-    cv.PutText(capture, "Perdio! bai" , (50,frame_size[1]-200), font, cv.RGB(0,0,0))
-    time.sleep(3000)
+    #while True:
+    #cv.PutText(capture, "Perdio Mejor suerte" , (50,frame_size[1]-50), font, cv.RGB(0,0,0))
+    time.sleep(5)
     cv2.destroyAllWindows()
-    cv.destroyAllWindows()
-    sys.exit()
+    mp3.stop()
+
+
+
 
 
 storage = cv.CreateMemStorage()
@@ -216,17 +223,20 @@ vidas = crear_vidas(nvidas)#crear la lista de corazoncitas
 # Loop principal
 mp3.play()
 i = 0
-juegoTerminado = False
-while juegoTerminado != True:
+juego_terminado = False
+while juego_terminado == False:
     
     capture = cv.QueryFrame(cam)# Capturar un frame de la camara
     cv.Flip(capture, capture, flipMode=1)#rotar la imagen para que salga derecha
 
     
+    
+
     for v in vidas:
         cv.SetImageROI(capture, v.getDimensions())
         cv.Copy(corazon, capture, mask3)
         cv.ResetImageROI(capture)
+
 
     ############################################################3
     if i%5==0:
@@ -258,6 +268,7 @@ while juegoTerminado != True:
     cv.AbsDiff(actual, previo, diferencia)# Diferencia entre los frames pixel por pixel
 
     frame = cv.CreateImage(frame_size, 8, 1)#creacion del frame
+    frame_completo = cv.CreateImage((frame.width*2,frame.height), 8, 1) #creacion del frame para ambas imagenes
     cv.CvtColor(diferencia, frame, cv.CV_BGR2GRAY)#convertido a escala de grises
     cv.Threshold(frame, frame, 10, 0xff, cv.CV_THRESH_BINARY)#se le aplica un treshold
     cv.Dilate(frame, frame, element=es, iterations=3)#se dilata con el elemento estructural creado 3 veces sobre la imagen
@@ -292,8 +303,8 @@ while juegoTerminado != True:
                         nvidas-=1 #Para eliminar las vidas de la pantalla
 
                         if nvidas<1:
-                            terminar_juego()
-                            #juegoTerminado = True
+                            juego_terminado = True
+                            break
                         vidas = crear_vidas(nvidas)
                     tipo = randint(0, 1)
                     t.tipo = tipo
@@ -302,21 +313,26 @@ while juegoTerminado != True:
                     if t.speed[1] < 15:#aumento de la velocidad
                         t.speed = (0, t.speed[1]+1)
                     score += nbolas#sumar el numero de bolas a la puntuacion
-
+    
     cv.PutText(capture, "Puntuacion: %d" % score, (10,frame_size[1]-10), font2, cv.RGB(0,0,0))#Agregar el titulo del score en pantalla
     cv.ShowImage("Juego", frame)#Mostrar la ventana del juego
     if writeVideo:
         cv.WriteFrame(video_writer, capture)
     cv.ShowImage("Morfologia", capture)
 
+
+
     previo = cv.CloneImage(actual)#se guarda este frame en para la proxima diferencia
 
     
     c = WaitKey(2)# Acabar el juego si se presiona ESC
     if c == 27:
+        terminar_juego()
         break
 
     initialDelay -= 1#ir disminuyendo el delay
     i += 1
-terminar_juego() #terminar el juego 
+
+terminar_juego()
 print score#imprimir el score
+
