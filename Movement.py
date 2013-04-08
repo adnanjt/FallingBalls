@@ -63,14 +63,7 @@ class Bolita:
         self.x += self.speed[0]
         self.y += self.speed[1]
 
-    def terminar_juego():
-    #while True:
-    #capture = cv.QueryFrame(cam)# Capturar un frame de la camara
-    #frame = cv.CreateImage(frame_size, 8, 1)#creacion del frame
-    #cv.Flip(capture, capture, flipMode=1)#rotar la imagen para que salga derecha
-    c = WaitKey(15000)# Acabar el juego si se presiona ESC
-    cv2.destroyAllWindows()
-    mp3.stop()
+
 
 
 #Creacion de la ventana para mostrar las imagenes capturadas
@@ -174,6 +167,15 @@ def crear_objetos(count):
 
     return targets#se retorna la lista de las bolitas
 
+def terminar_juego():
+#while True:
+#capture = cv.QueryFrame(cam)# Capturar un frame de la camara
+#frame = cv.CreateImage(frame_size, 8, 1)#creacion del frame
+#cv.Flip(capture, capture, flipMode=1)#rotar la imagen para que salga derecha
+    c = WaitKey(15000)# Acabar el juego si se presiona ESC
+    cv2.destroyAllWindows()
+    mp3.stop()
+
 #funcion para crear las vidas a mostrarse e3n pantalla
 def crear_vidas(count):
     
@@ -213,7 +215,6 @@ score = 0#puntuacion
 font = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 8, 8)#Letras para mostrar la puntuacion
 font2 = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 4, 8)#Letras para mostrar la puntuacion
 font3 = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 8, 8)#Letras para mostrar la puntuacion
-
 
 nvidas = 3#numero de vidas del jugador
 vidas = crear_vidas(nvidas)#crear la lista de corazoncitas
@@ -321,6 +322,7 @@ while juego_terminado == False:
 
 
                 else:#eliminar una bolita si la mano ocupa el cuadro de una bolita(vuelve al inicio)
+                    
                     if t.tipo == 0:
                         mp32.play()
 
@@ -328,7 +330,7 @@ while juego_terminado == False:
                         mp33.play()
                         nvidas-=1 #Para eliminar las vidas de la pantalla
                         vidas = crear_vidas(nvidas)
-                        if nvidas<0:
+                        if nvidas<1:
                             juego_terminado = True
                             cv.PutText(capture, "GAME OVER" , (50,frame_size[1]/2), font3, cv.RGB(150,0,0))
                             cv.PutText(capture, "GAME OVER" , (50*5,frame_size[1]/2), font3, cv.RGB(150,0,0))
@@ -354,8 +356,6 @@ while juego_terminado == False:
 
 
     previo = cv.CloneImage(actual)#se guarda este frame en para la proxima diferencia
-
-    
     c = WaitKey(2)# Acabar el juego si se presiona ESC
     if c == 27:
         cv2.destroyAllWindows()
