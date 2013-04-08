@@ -1,7 +1,12 @@
+
+# OpenCV en Python : http://opencv.willowgarage.com/documentation/python/index.html
+#http://www.cs.iit.edu/~agam/cs512/lect-notes/opencv-intro/opencv-intro.html
+import cv2
 import cv2.cv as cv
 import random
 import mp3play
 import time
+import numpy as np
 from random import randint
 cd c:\users\angelo\my documents 
 
@@ -19,9 +24,11 @@ def WaitKey(delay = 0):
 # if __name__ == '__main__':
 #     cv.NamedWindow("prueba", cv.CV_WINDOW_AUTOSIZE)
 
-    # cv.ShowImage("prueba", None)
-    # c = cv.WaitKey()
-    # print "%d - %d" % (c & ~0b100000000000000000000,c)
+#     cv2.resizeWindow("prueba", 500, 500)
+
+#     cv.ShowImage("prueba", None)
+#     c = cv.WaitKey()
+#     print "%d - %d" % (c & ~0b100000000000000000000,c)
 
 
 #Clase para la imagen
@@ -60,9 +67,9 @@ class Bolita:
 #cv.NamedWindow("window_a", cv.CV_WINDOW_AUTOSIZE)#Ventana para mostrar el juego
 #cv.NamedWindow("window_b", cv.CV_WINDOW_AUTOSIZE)#Ventana para mostrar la diferencia
 
-archivo = r'Minimal.mp3'#Path del archivo de musica
-archivo2 = r'bolitatocada.mp3'
-archivo3 = r'bombaS.mp3'
+archivo = r'C:\users\angelo\my documents\Minimal.mp3'#Path del archivo de musica
+archivo2 = r'C:\users\angelo\my documents\bolitatocada.mp3'
+archivo3 = r'C:\users\angelo\my documents\bombaS.mp3'
 mp3 = mp3play.load(archivo)#Cargar el archivo de musica 
 mp32 = mp3play.load(archivo2)
 mp33 = mp3play.load(archivo3)
@@ -254,6 +261,7 @@ while True:
     cv.AbsDiff(actual, previo, diferencia)# Diferencia entre los frames pixel por pixel
 
     frame = cv.CreateImage(frame_size, 8, 1)#creacion del frame
+    frame_completo = cv.CreateImage((frame.width*2,frame.height), 8, 1) #creacion del frame para ambas imagenes
     cv.CvtColor(diferencia, frame, cv.CV_BGR2GRAY)#convertido a escala de grises
     cv.Threshold(frame, frame, 10, 0xff, cv.CV_THRESH_BINARY)#se le aplica un treshold
     cv.Dilate(frame, frame, element=es, iterations=3)#se dilata con el elemento estructural creado 3 veces sobre la imagen
@@ -292,21 +300,26 @@ while True:
                     if t.speed[1] < 15:#aumento de la velocidad
                         t.speed = (0, t.speed[1]+1)
                     score += nbolas#sumar el numero de bolas a la puntuacion
-
+    
     cv.PutText(capture, "Puntuacion: %d" % score, (10,frame_size[1]-10), font2, cv.RGB(0,0,0))#Agregar el titulo del score en pantalla
     cv.ShowImage("Juego", frame)#Mostrar la ventana del juego
     if writeVideo:
         cv.WriteFrame(video_writer, capture)
     cv.ShowImage("Morfologia", capture)
 
+
+
     previo = cv.CloneImage(actual)#se guarda este frame en para la proxima diferencia
 
     
     c = WaitKey(2)# Acabar el juego si se presiona ESC
     if c == 27:
+        cv2.destroyAllWindows()
+        mp3.stop()
         break
 
     initialDelay -= 1#ir disminuyendo el delay
     i += 1
 
 print score#imprimir el score
+
