@@ -8,7 +8,7 @@ import mp3play
 import time
 import numpy as np
 from random import randint
-cd c:\users\angelo\my documents 
+cd "C:\Users\Owner\Documents\GitHub\FallingBalls"
 
 ESC = 27 #Valor ASCII de el ESC
 portada = cv.LoadImage("PortadaFB.jpg")
@@ -70,10 +70,10 @@ class Bolita:
 #cv.NamedWindow("window_a", cv.CV_WINDOW_AUTOSIZE)#Ventana para mostrar el juego
 #cv.NamedWindow("window_b", cv.CV_WINDOW_AUTOSIZE)#Ventana para mostrar la diferencia
 
-archivo = r'C:\users\angelo\my documents\Minimal.mp3'#Path del archivo de musica
-archivo2 = r'C:\users\angelo\my documents\bolitatocada.mp3'
-archivo3 = r'C:\users\angelo\my documents\bombaS.mp3'
-archivo4 = r'C:\users\angelo\my documents\GameOver.mp3'
+archivo = r'Minimal.mp3'#Path del archivo de musica
+archivo2 = r'bolitatocada.mp3'
+archivo3 = r'bombaS.mp3'
+archivo4 = r'GameOver.mp3'
 mp3 = mp3play.load(archivo)#Cargar el archivo de musica 
 mp32 = mp3play.load(archivo2)
 mp33 = mp3play.load(archivo3)
@@ -273,9 +273,12 @@ while juego_terminado == False:
         if x2+w2 >= 350 and x2+w2 <= 400 and y2+h2>= 350 and y2+h2 <= 400:
             cv.PutText(capture, "                                    " , (50,frame_size[1]-50), font, cv.RGB(100,30,80))
 
-        else:
-            cv.PutText(capture, "Muevase hacia la posicion de juego: " , (50,frame_size[1]-100), font, cv.RGB(100,30,80))
-
+        elif x2+w2 < 350 :
+            cv.PutText(capture, "Muevase hacia delante: " , (50,frame_size[1]-50), font, cv.RGB(100,30,80))
+            dentroPosicion = False
+        elif x2+w2 > 430 :
+            cv.PutText(capture, "Muevase hacia atras: " , (50,frame_size[1]-50), font, cv.RGB(100,30,80))
+            dentroPosicion = False
     
 
     ##############################################################
