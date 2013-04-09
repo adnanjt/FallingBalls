@@ -73,9 +73,12 @@ class Bolita:
 archivo = r'C:\users\angelo\my documents\Minimal.mp3'#Path del archivo de musica
 archivo2 = r'C:\users\angelo\my documents\bolitatocada.mp3'
 archivo3 = r'C:\users\angelo\my documents\bombaS.mp3'
+archivo4 = r'C:\users\angelo\my documents\GameOver.mp3'
 mp3 = mp3play.load(archivo)#Cargar el archivo de musica 
 mp32 = mp3play.load(archivo2)
 mp33 = mp3play.load(archivo3)
+mp34 = mp3play.load(archivo4)
+
 
 # Estructuracion del elemento para la dilatacion, "ubica y llena el kernel rectangular convolucional" para interactuar con la imagen para los cambios morfologicos
 es = cv.CreateStructuringElementEx(9,9, 4,4, cv.CV_SHAPE_ELLIPSE)
@@ -158,7 +161,12 @@ def crear_objetos(count):
     targets = list()#Lista de las bolitas
     for i in range(count):
         if count > 3:#crear menos bombas que bolitas
-            tipo = randint(0, 1)
+            tipo = randint(0, 10)#probabilidad mas alta que salga una bolita a una bomba
+            if tipo >= 0 and tipo <= 7:
+                tipo = 0
+
+            else: 
+                tipo=1
 
         tgt = Bolita(random.randint(0, frame_size[0]-bola.width), 0, tipo)#Limitar las posiciones en x y y que pueda cojer la bolita con su ancho y con el del frame
         tgt.width = bola.width#ancho de la misma imagen original
@@ -266,7 +274,7 @@ while juego_terminado == False:
             cv.PutText(capture, "                                    " , (50,frame_size[1]-50), font, cv.RGB(100,30,80))
 
         else:
-            cv.PutText(capture, "Muevase hacia la posicion de juego: " , (50,frame_size[1]-50), font, cv.RGB(100,30,80))
+            cv.PutText(capture, "Muevase hacia la posicion de juego: " , (50,frame_size[1]-100), font, cv.RGB(100,30,80))
 
     
 
@@ -338,6 +346,7 @@ while juego_terminado == False:
                             cv.PutText(capture, "GAME OVER" , (50,frame_size[1]/2), font3, cv.RGB(150,0,0))
                             cv.PutText(capture, "GAME OVER" , (50*5,frame_size[1]/2), font3, cv.RGB(150,0,0))
                             cv.PutText(capture, "GAME OVER" , (50*10,frame_size[1]/2), font3, cv.RGB(150,0,0))
+                            mp34.play()
                             break
                     tipoprev = t.tipo
                     tipo = randint(0, 10)#probabilidad mas alta que salga una bolita a una bomba
@@ -351,7 +360,7 @@ while juego_terminado == False:
                     if tipoprev == 0:
                         score += nbolas#sumar el numero de bolas a la puntuacion
     
-    cv.PutText(capture, "Puntuacion: %d" % score, (10,frame_size[1]-10), font2, cv.RGB(0,0,0))#Agregar el titulo del score en pantalla
+    cv.PutText(capture, "Puntuacion: %d" % score, (10,frame_size[1]-10), font2, cv.RGB(255,200,200))#Agregar el titulo del score en pantalla
     cv.ShowImage("Juego", frame)#Mostrar la ventana del juego
     if writeVideo:
         cv.WriteFrame(video_writer, capture)
