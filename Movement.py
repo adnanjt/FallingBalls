@@ -11,7 +11,7 @@ from random import randint
 cd c:\users\angelo\my documents 
 
 ESC = 27 #Valor ASCII de el ESC
-
+portada = cv.LoadImage("PortadaFB.jpg")
 def WaitKey(delay = 0):
     c = cv.WaitKey(delay)
     if c == -1:
@@ -21,14 +21,14 @@ def WaitKey(delay = 0):
 
     return ret
 
-# if __name__ == '__main__':
-#     cv.NamedWindow("prueba", cv.CV_WINDOW_AUTOSIZE)
+if __name__ == '__main__':
+    cv.NamedWindow("Falling Balls", cv.CV_WINDOW_AUTOSIZE)
 
-#     cv2.resizeWindow("prueba", 500, 500)
+    cv2.resizeWindow("Falling Balls", 500, 500)
 
-#     cv.ShowImage("prueba", None)
-#     c = cv.WaitKey()
-#     print "%d - %d" % (c & ~0b100000000000000000000,c)
+    cv.ShowImage("Falling Balls", portada)
+    c = cv.WaitKey()
+    print "%d - %d" % (c & ~0b100000000000000000000,c)
 
 
 #Clase para la imagen
@@ -310,9 +310,12 @@ while juego_terminado == False:
                             tipo = randint(0, 10)#probabilidad mas alta que salga una bolita a una bomba
                             if tipo >= 0 and tipo <= 7:
                                 tipo = 0
-                                t.tipo = tipo
-                                t.y = 0#se ubica la bolita al inicio de la pantalla
-                                t.x = random.randint(0, frame_size[0]-bola.width)#ubicacion aleatoria en el eje x
+                            else: 
+                                tipo=1
+
+                            t.tipo = tipo
+                            t.y = 0#se ubica la bolita al inicio de la pantalla
+                            t.x = random.randint(0, frame_size[0]-bola.width)#ubicacion aleatoria en el eje x
 
                         if nbolas ==0 and nvidas >0: #crear nuevos elementos siempre y cuando resten vidas 
                             nbolas = 5 
@@ -330,13 +333,13 @@ while juego_terminado == False:
                         mp33.play()
                         nvidas-=1 #Para eliminar las vidas de la pantalla
                         vidas = crear_vidas(nvidas)
-                        if nvidas<1:
+                        if nvidas<0:
                             juego_terminado = True
                             cv.PutText(capture, "GAME OVER" , (50,frame_size[1]/2), font3, cv.RGB(150,0,0))
                             cv.PutText(capture, "GAME OVER" , (50*5,frame_size[1]/2), font3, cv.RGB(150,0,0))
                             cv.PutText(capture, "GAME OVER" , (50*10,frame_size[1]/2), font3, cv.RGB(150,0,0))
                             break
-
+                    tipoprev = t.tipo
                     tipo = randint(0, 10)#probabilidad mas alta que salga una bolita a una bomba
                     if tipo >= 0 and tipo <= 7:
                         tipo = 0
@@ -345,7 +348,8 @@ while juego_terminado == False:
                     t.x = random.randint(0, frame_size[0]-bola.width)#ubicacion aleatoria en el eje x
                     if t.speed[1] < 15:#aumento de la velocidad
                         t.speed = (0, t.speed[1]+1)
-                    score += nbolas#sumar el numero de bolas a la puntuacion
+                    if tipoprev == 0:
+                        score += nbolas#sumar el numero de bolas a la puntuacion
     
     cv.PutText(capture, "Puntuacion: %d" % score, (10,frame_size[1]-10), font2, cv.RGB(0,0,0))#Agregar el titulo del score en pantalla
     cv.ShowImage("Juego", frame)#Mostrar la ventana del juego
