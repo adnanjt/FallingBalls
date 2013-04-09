@@ -9,26 +9,25 @@ import time
 import numpy as np
 from random import randint
 cd "C:\Users\Owner\Documents\GitHub\FallingBalls"
-
 ESC = 27 #Valor ASCII de el ESC
-
+portada = cv.LoadImage("PortadaFB.jpg")
 def WaitKey(delay = 0):
     c = cv.WaitKey(delay)
+
     if c == -1:
         ret = -1
     else:
         ret = c & ~0b100000000000000000000 
-
     return ret
 
-# if __name__ == '__main__':
-#     cv.NamedWindow("prueba", cv.CV_WINDOW_AUTOSIZE)
+if __name__ == '__main__':
+    cv.NamedWindow("Falling Balls", cv.CV_WINDOW_AUTOSIZE)
 
-#     cv2.resizeWindow("prueba", 500, 500)
+    cv2.resizeWindow("Falling Balls", 500, 500)
 
-#     cv.ShowImage("prueba", None)
-#     c = cv.WaitKey()
-#     print "%d - %d" % (c & ~0b100000000000000000000,c)
+    cv.ShowImage("Falling Balls", portada)
+    c = cv.WaitKey()
+    print "%d - %d" % (c & ~0b100000000000000000000,c)
 
 
 #Clase para la imagen
@@ -62,6 +61,9 @@ class Bolita:
     def update(self):
         self.x += self.speed[0]
         self.y += self.speed[1]
+
+
+
 
 #Creacion de la ventana para mostrar las imagenes capturadas
 #cv.NamedWindow("window_a", cv.CV_WINDOW_AUTOSIZE)#Ventana para mostrar el juego
@@ -140,21 +142,20 @@ mask_original3 = cv.LoadImage("corazon_mask.png")#Cargar la mascara de entrada p
 mask3 = cv.CreateImage((64,64), mask_original3.depth, corazon_original.channels)
 cv.Resize(mask_original3, mask3)#Bolita final 
 
-
-
-
 def valor_hit(imagen, bolita):
     roi = cv.GetSubRect(imagen, bolita.getDimensions())#se corta la imagen del tamano de la bolita
     return cv.CountNonZero(roi)#numero de elementos que no son cero del arreglo de entrada
 
 #funcion para crear una lista de x bolitas del mismo tamano de la original
 def crear_objetos(count):
-    #tipo = 1 #para la blita, 1 para la bomba
+    #tipo = 0 para la blita, 1 para la bomba
     #Generacion de numero aleatorio de 0 y 1
-    
+    tipo = 0
     targets = list()#Lista de las bolitas
     for i in range(count):
-        tipo = randint(0, 1)
+        if count > 3:#crear menos bombas que bolitas
+            tipo = randint(0, 1)
+
         tgt = Bolita(random.randint(0, frame_size[0]-bola.width), 0, tipo)#Limitar las posiciones en x y y que pueda cojer la bolita con su ancho y con el del frame
         tgt.width = bola.width#ancho de la misma imagen original
         tgt.height = bola.height#altura de la misma imagen original
@@ -162,9 +163,17 @@ def crear_objetos(count):
 
     return targets#se retorna la lista de las bolitas
 
+def terminar_juego():
+#while True:
+#capture = cv.QueryFrame(cam)# Capturar un frame de la camara
+#frame = cv.CreateImage(frame_size, 8, 1)#creacion del frame
+#cv.Flip(capture, capture, flipMode=1)#rotar la imagen para que salga derecha
+    c = WaitKey(15000)# Acabar el juego si se presiona ESC
+    cv2.destroyAllWindows()
+    mp3.stop()
+
 #funcion para crear las vidas a mostrarse e3n pantalla
 def crear_vidas(count):
-    
     vidas = list()#Lista de corazones
     posx = 430
     for i in range(count):
@@ -173,7 +182,6 @@ def crear_vidas(count):
         tgt.height = corazon.height#altura de la misma imagen original
         vidas.append(tgt)#agregar a la lista la nueva creada
         posx = posx+70
-
     return vidas#se retorna la lista de las bolitas
 
 #funcion para detectar la cara y asi delimitar la distancia 
@@ -184,19 +192,10 @@ def detect_faces(image):
         for (x,y,w,h),n in detected:
             faces.append((x,y,w,h))
     return faces
-def terminar_juego():
-    #while True:
-    #cv.PutText(capture, "Perdio Mejor suerte" , (50,frame_size[1]-50), font, cv.RGB(0,0,0))
-    time.sleep(5)
-    cv2.destroyAllWindows()
-    mp3.stop()
 
 
-
-
-
-storage = cv.CreateMemStorage()
 cascade = cv.Load('haarcascade_frontalface_default.xml')
+storage = cv.CreateMemStorage()
 nbolas = 5#numero de bolas
 targets = crear_objetos(nbolas)
 
@@ -206,45 +205,34 @@ score = 0#puntuacion
 
 font = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 8, 8)#Letras para mostrar la puntuacion
 font2 = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 4, 8)#Letras para mostrar la puntuacion
+font3 = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 8, 8)#Letras para mostrar la puntuacion
 
 nvidas = 3#numero de vidas del jugador
 vidas = crear_vidas(nvidas)#crear la lista de corazoncitas
-
 
 # capture - footage original 
 # actual - footage borroso(blurred ), blured para eliminar el ruido
 # diferencia - fame de la diferencia
 # frame - frame diferenciado gray scaled > threshold(umbral) > dilate | working image (Pata detectar el movimiento), El filtro treshhold para que los pixeles de la diferencia sean blancos 
-# bola_original - imagen de la bola
+# bola_original - imagen de la bolaF
 # bola - imagen de la bola menor
 # mask_original - imagen de mascara
 # mask - imagen de mascara menor
-
+juego_terminado = False
 # Loop principal
+dentroPosicion = True
 mp3.play()
 i = 0
-juego_terminado = False
 while juego_terminado == False:
-    
     capture = cv.QueryFrame(cam)# Capturar un frame de la camara
     cv.Flip(capture, capture, flipMode=1)#rotar la imagen para que salga derecha
-
-    
-    
-
     for v in vidas:
         cv.SetImageROI(capture, v.getDimensions())
         cv.Copy(corazon, capture, mask3)
         cv.ResetImageROI(capture)
-
-
     ############################################################3
     if i%5==0:
             faces = detect_faces(capture)
-    x2 = 0
-    w2 = 0 
-    y2 = 0
-    h2 = 0 
     for (x,y,w,h) in faces:
         cv.Rectangle(capture, (x,y), (x+w,y+h), 255)
         x2 = x 
@@ -254,26 +242,19 @@ while juego_terminado == False:
         #print(x+w, y+w)
         if x2+w2 >= 350 and x2+w2 <= 400 and y2+h2>= 350 and y2+h2 <= 400:
             cv.PutText(capture, "                                    " , (50,frame_size[1]-50), font, cv.RGB(100,30,80))
-
+            dentroPosicion = True
         else:
             cv.PutText(capture, "Muevase hacia la posicion de juego: " , (50,frame_size[1]-50), font, cv.RGB(100,30,80))
-
-    
-
+            actual = previo
+            dentroPosicion = False
     ##############################################################
-
-
-    
     cv.Smooth(capture, actual, cv.CV_BLUR, 15,15)#suavisado para evitar falsos positivos de la imagen
     cv.AbsDiff(actual, previo, diferencia)# Diferencia entre los frames pixel por pixel
-
     frame = cv.CreateImage(frame_size, 8, 1)#creacion del frame
     frame_completo = cv.CreateImage((frame.width*2,frame.height), 8, 1) #creacion del frame para ambas imagenes
     cv.CvtColor(diferencia, frame, cv.CV_BGR2GRAY)#convertido a escala de grises
     cv.Threshold(frame, frame, 10, 0xff, cv.CV_THRESH_BINARY)#se le aplica un treshold
     cv.Dilate(frame, frame, element=es, iterations=3)#se dilata con el elemento estructural creado 3 veces sobre la imagen
-
-    
     if initialDelay <= 0:#cuando se termine el delay
         for t in targets:
             if t.active:
@@ -281,58 +262,67 @@ while juego_terminado == False:
                 if nzero < 1000:#parametro de decision
                     # Dibujar la bolita en la pantalla
                     cv.SetImageROI(capture, t.getDimensions())#Establecer el ROI (region de interes)
-
                     if t.tipo == 0:
                         cv.Copy(bola, capture, mask)#si la mascara es diferente de 0 copia en capture la bolita
-
                     else: 
                         cv.Copy(bomba, capture, mask2)
-
                     cv.ResetImageROI(capture)#resetear
+                    #if dentroPosicion == True:
                     t.update()#actualizar posicion, vel
                     # En caso que la bolita llegue al final de la pantalla 
                     if t.y + t.height >= frame_size[1]:
-                        t.active = False
-                        nbolas -= 1
+                        if t.tipo ==0:
+                            t.active = False
+                            nbolas -= 1
+                        else: #en caso de una bomba llegar al final, debe reiniciar
+                            tipo = randint(0, 10)#probabilidad mas alta que salga una bolita a una bomba
+                            if tipo >= 0 and tipo <= 7:
+                                tipo = 0
+                            else: 
+                                tipo=1
+                            t.tipo = tipo
+                            t.y = 0#se ubica la bolita al inicio de la pantalla
+                            t.x = random.randint(0, frame_size[0]-bola.width)#ubicacion aleatoria en el eje x
+                        if nbolas ==0 and nvidas >0: #crear nuevos elementos siempre y cuando resten vidas 
+                            nbolas = 5 
+                            targets = crear_objetos(nbolas)
                 else:#eliminar una bolita si la mano ocupa el cuadro de una bolita(vuelve al inicio)
                     if t.tipo == 0:
                         mp32.play()
-
                     else: 
                         mp33.play()
                         nvidas-=1 #Para eliminar las vidas de la pantalla
-
-                        if nvidas<1:
-                            juego_terminado = True
-                            break
                         vidas = crear_vidas(nvidas)
-                    tipo = randint(0, 1)
+                        if nvidas<0:
+                            juego_terminado = True
+                            cv.PutText(capture, "GAME OVER" , (50,frame_size[1]/2), font3, cv.RGB(150,0,0))
+                            cv.PutText(capture, "GAME OVER" , (50*5,frame_size[1]/2), font3, cv.RGB(150,0,0))
+                            cv.PutText(capture, "GAME OVER" , (50*10,frame_size[1]/2), font3, cv.RGB(150,0,0))
+                            break
+                    tipoprev = t.tipo
+                    tipo = randint(0, 10)#probabilidad mas alta que salga una bolita a una bomba
+                    if tipo >= 0 and tipo <= 7:
+                        tipo = 0
                     t.tipo = tipo
                     t.y = 0#se ubica la bolita al inicio de la pantalla
                     t.x = random.randint(0, frame_size[0]-bola.width)#ubicacion aleatoria en el eje x
                     if t.speed[1] < 15:#aumento de la velocidad
                         t.speed = (0, t.speed[1]+1)
-                    score += nbolas#sumar el numero de bolas a la puntuacion
-    
+                    if tipoprev == 0:
+                        score += nbolas#sumar el numero de bolas a la puntuacion
     cv.PutText(capture, "Puntuacion: %d" % score, (10,frame_size[1]-10), font2, cv.RGB(0,0,0))#Agregar el titulo del score en pantalla
     cv.ShowImage("Juego", frame)#Mostrar la ventana del juego
     if writeVideo:
         cv.WriteFrame(video_writer, capture)
     cv.ShowImage("Morfologia", capture)
-
-
-
     previo = cv.CloneImage(actual)#se guarda este frame en para la proxima diferencia
-
-    
     c = WaitKey(2)# Acabar el juego si se presiona ESC
     if c == 27:
-        terminar_juego()
+        cv2.destroyAllWindows()
+        mp3.stop()
         break
-
     initialDelay -= 1#ir disminuyendo el delay
     i += 1
 
 terminar_juego()
 print score#imprimir el score
-
